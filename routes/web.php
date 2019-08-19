@@ -17,4 +17,11 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/profile/{user}', 'ProfileController@index')->name('profile.index');
+Route::get('/profile/{user}/edit', 'ProfileController@edit');
+Route::PATCH('/profile/{user}', 'ProfileController@update');
+
+Route::get('/post/create', 'PostsController@create');
+Route::post('/post', 'PostsController@store');
+Route::get('/post/{post}', 'PostsController@show');
