@@ -4,15 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Profile;
 use App\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Intervention\Image\Facades\Image;
 
 class ProfileController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param User $user
+     * @return Response
      */
+//    public function __construct()
+//    {
+//        $this->middleware('auth');
+//    }
+
     public function index(User $user)
     {
         return view('index', compact('user'));
@@ -21,7 +30,7 @@ class ProfileController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return void
      */
     public function create()
     {
@@ -31,8 +40,8 @@ class ProfileController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return void
      */
     public function store(Request $request)
     {
@@ -42,8 +51,8 @@ class ProfileController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Profile  $profile
-     * @return \Illuminate\Http\Response
+     * @param Profile $profile
+     * @return void
      */
     public function show(Profile $profile)
     {
@@ -53,32 +62,56 @@ class ProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Profile  $profile
-     * @return \Illuminate\Http\Response
+     * @param User $user
+     * @return Response
+     * @throws AuthorizationException
      */
     public function edit(User $user)
     {
+        $this->authorize('update', $user->profile);
         return view('profile.edit', compact('user'));
     }
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Profile  $profile
-     * @return \Illuminate\Http\Response
+     * @param User $user
+     * @return Response
+     * @throws AuthorizationException
      */
-    public function update(Request $request, User $user)
+    public function update(User $user)
     {
-        return redirect('profile.index');
-        dd("hitting the update method");
+        $this->authorize('update', $user->profile);
+
+        $data = request()->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'url' => 'url',
+            'image' => ''
+        ]);
+
+        if (request('image')){
+            $imagePath = request('image')->store('profile', 'public');
+
+            $image = Image::make(public_path("storage/$imagePath"))->fit(1000, 1000);
+            $image->save();
+
+            $imageArray = ['image' => $imagePath];
+        }
+
+        auth()->user()->profile->update(array_merge(
+            $data,
+            $imageArray ?? []
+        ));
+
+        return redirect("/profile/{$user->id}");
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Profile  $profile
-     * @return \Illuminate\Http\Response
+     * @param Profile $profile
+     * @return void
      */
     public function destroy(Profile $profile)
     {
