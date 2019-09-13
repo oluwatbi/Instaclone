@@ -25,7 +25,8 @@
             <div class="container">
                 <a class="navbar-brand d-flex" href="{{ url('/') }}">
                     <div><img src="/svg/instagram-logo.svg" style="height: 25px;" class="pr-3"></div>
-                    <div class="pr-3"><img src="/img/Instagram.png"></div>
+                    <div class="pr-3">InstaClone</div>
+{{--                    <div class="pr-3"><img src="/img/Instagram.png"></div>--}}
                 </a>
 
                     <div class="searchbar ml-5 pl-5">
